@@ -1,0 +1,16 @@
+FROM amazonlinux
+RUN yum install java gzip tar -y
+WORKDIR /opt
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.104/bin/apache-tomcat-9.0.104.tar.gz .
+RUN tar -xvf apache-tomcat-9.0.104.tar.gz
+RUN rm -f apache-tomcat-9.0.104.tar.gz
+RUN sed -i 's/"127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1"/".*"/g' apache-tomcat-9.0.104/webapps/manager/META-INF/context.xml
+WORKDIR /opt/apache-tomcat-9.0.104/conf/
+RUN rm -f tomcat-users.xml
+RUN echo '<?xml version="1.0" encoding="utf-8"?> \
+            <tomcat-users> \
+              <role rolename="manager-gui"/> \
+              <user username="venu" password="venu" roles="manager-gui, manager-script, manager-status"/> \
+            </tomcat-users>' > tomcat-users.xml
+EXPOSE 8080
+CMD ["/opt/apache-tomcat-9.0.104/bin/catalina.sh", "run"]
